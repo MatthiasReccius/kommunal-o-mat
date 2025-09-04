@@ -23,3 +23,16 @@ def count_tokens(text: str, model: str = "models/gemini-2.0-flash") -> int:
     r = requests.post(url, headers=HEADERS, data=json.dumps(body))
     r.raise_for_status()
     return r.json().get("totalTokens", 0)
+
+def _norm(s: str) -> str:
+    # NFC normalization to avoid "Grüne" vs "Grüne" issues
+    return unicodedata.normalize("NFC", s).strip()
+
+# Get metadata associated with chunk (party, section, ...)
+def _meta_get(meta_list, key, default="—"):
+    if not isinstance(meta_list, list):
+        return default
+    for m in meta_list:
+        if m.get("key") == key:
+            return m.get("stringValue") or m.get("numericValue") or default
+    return default
