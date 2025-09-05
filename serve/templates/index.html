@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kommunal-O-Mat Frage</title>
+    <!-- Optionales einfaches CSS für etwas Abstand -->
+    <style>
+        body { font-family: sans-serif; margin: 2rem;}
+        .result { margin-top: 2rem; }
+        .result h3 { margin-bottom: 0.2rem; }
+        .result p { margin-top: 0.2rem; }
+        details { margin-bottom: 1rem; }
+        summary { cursor: pointer; color: #0645AD; }
+    </style>
+</head>
+<body>
+    <h1>Kommunal-O-Mat – Frage an Parteien</h1>
+    <form method="post">
+        <label for="question">Ihre Frage:</label><br>
+        <textarea name="question" id="question" rows="3" cols="60">{{ question }}</textarea><br><br>
+        
+        <strong>Wählen Sie Parteien:</strong><br>
+        {% for party in parties %}
+            <input type="checkbox" name="parties" id="party-{{ loop.index }}" value="{{ party }}"
+                   {% if party in selected_parties %}checked{% endif %}>
+            <label for="party-{{ loop.index }}">{{ party }}</label><br>
+        {% endfor %}
+        <br>
+        <button type="submit">Frage stellen</button>
+    </form>
+
+    {% if answers %}
+      <div class="result">
+        <h2>Ergebnisse</h2>
+        {% for ans in answers %}
+          <div class="party-result">
+            <h3>{{ ans.party }}</h3>
+            {% if ans.status != 'ok' %}
+              <p><em>{{ ans.message }}</em></p>
+            {% else %}
+              <p>{{ ans.summary }}</p>
+              {% if ans.quotes %}
+                <details>
+                  <summary>Quellen anzeigen</summary>
+                  <ul>
+                    {% for quote in ans.quotes %}
+                      <li>&ldquo;{{ quote.quote }}&rdquo; <br>
+                          <small><em>– aus Kapitel "{{ quote.section }}", Relevanz-Score {{ quote.score }}</em></small>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </details>
+              {% endif %}
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+</body>
+</html>
