@@ -1,60 +1,63 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>Kommunal-O-Mat Frage</title>
-    <!-- Optionales einfaches CSS für etwas Abstand -->
-    <style>
-        body { font-family: sans-serif; margin: 2rem;}
-        .result { margin-top: 2rem; }
-        .result h3 { margin-bottom: 0.2rem; }
-        .result p { margin-top: 0.2rem; }
-        details { margin-bottom: 1rem; }
-        summary { cursor: pointer; color: #0645AD; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Kommunal-O-Mat</title>
+  <!-- Einfaches Inline-CSS für eine bessere Lesbarkeit -->
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    form { margin-bottom: 2rem; }
+    label { margin-right: 1em; }
+    textarea { width: 100%; max-width: 600px; height: 4em; }
+    button { margin-top: 1em; padding: 0.5em 1em; }
+    h2 { margin-top: 1.5em; }
+    details { margin: 0.5em 0 1.5em 0; }
+    summary { cursor: pointer; font-weight: bold; }
+    blockquote { margin: 0.5em 0 0.5em 1em; padding-left: 0.8em; border-left: 4px solid #ccc; }
+  </style>
 </head>
 <body>
-    <h1>Kommunal-O-Mat – Frage an Parteien</h1>
-    <form method="post">
-        <label for="question">Ihre Frage:</label><br>
-        <textarea name="question" id="question" rows="3" cols="60">{{ question }}</textarea><br><br>
-        
-        <strong>Wählen Sie Parteien:</strong><br>
-        {% for party in parties %}
-            <input type="checkbox" name="parties" id="party-{{ loop.index }}" value="{{ party }}"
-                   {% if party in selected_parties %}checked{% endif %}>
-            <label for="party-{{ loop.index }}">{{ party }}</label><br>
-        {% endfor %}
-        <br>
-        <button type="submit">Frage stellen</button>
-    </form>
+  <h1>Kommunal-O-Mat</h1>
+  <p>Geben Sie eine Frage ein und wählen Sie die Parteien aus, um relevante Programm-Aussagen zu erhalten.</p>
+  <!-- Formular für Frageingabe und Parteienauswahl -->
+  <form method="post" action="/">
+    <p>
+      <label for="question"><strong>Ihre Frage:</strong></label><br />
+      <textarea id="question" name="question" required>{{ question }}</textarea>
+    </p>
+    <p><strong>Parteien auswählen:</strong></p>
+    <p>
+      {% for party in parties %}
+        <label>
+          <input type="checkbox" name="parties" value="{{ party }}" 
+                 {% if party in selected_parties %}checked{% endif %}>
+          {{ party }}
+        </label>
+      {% endfor %}
+    </p>
+    <button type="submit">Absenden</button>
+  </form>
 
-    {% if answers %}
-      <div class="result">
-        <h2>Ergebnisse</h2>
-        {% for ans in answers %}
-          <div class="party-result">
-            <h3>{{ ans.party }}</h3>
-            {% if ans.status != 'ok' %}
-              <p><em>{{ ans.message }}</em></p>
-            {% else %}
-              <p>{{ ans.summary }}</p>
-              {% if ans.quotes %}
-                <details>
-                  <summary>Quellen anzeigen</summary>
-                  <ul>
-                    {% for quote in ans.quotes %}
-                      <li>&ldquo;{{ quote.quote }}&rdquo; <br>
-                          <small><em>– aus Kapitel "{{ quote.section }}", Relevanz-Score {{ quote.score }}</em></small>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                </details>
-              {% endif %}
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
+  {% if answers %}
+    <!-- Ergebnisse pro Partei ausgeben -->
+    {% for ans in answers %}
+      <h2>{{ ans.party }}</h2>
+      {% if ans.status != "ok" %}
+        <!-- Hinweis, falls keine relevanten Passagen gefunden wurden -->
+        <p><em>{{ ans.message }}</em></p>
+      {% else %}
+        <!-- Kurzfazit/Zusammenfassung der gefundenen Passagen -->
+        <p><strong>Kurzfazit:</strong> {{ ans.summary }}</p>
+        <!-- Ausklappbare Details mit den Original-Zitaten aus dem Programm -->
+        <details>
+          <summary>Details aus dem Programmtext</summary>
+          {% for q in ans.quotes %}
+            <p><em>Aus dem Kapitel "{{ q.section }}"</em>:</p>
+            <blockquote>{{ q.quote }}</blockquote>
+          {% endfor %}
+        </details>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
 </body>
 </html>
