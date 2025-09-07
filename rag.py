@@ -1,3 +1,5 @@
+import requests, json
+
 def summarize_from_quotes(party: str, question: str, quotes: List[dict], max_tokens=1040):
     if not quotes:
         return None

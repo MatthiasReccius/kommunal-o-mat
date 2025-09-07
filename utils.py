@@ -1,3 +1,5 @@
+import requests, json, unicodedata, re
+
 def _check_key():
     if not GEMINI_API_KEY:
         raise RuntimeError("Set GOOGLE_API_KEY in your environment")
@@ -36,3 +38,9 @@ def _meta_get(meta_list, key, default="—"):
         if m.get("key") == key:
             return m.get("stringValue") or m.get("numericValue") or default
     return default
+
+def normalize_question(q: str) -> str:
+    """Normalize Unicode and collapse whitespace in a free-text question."""
+    q = unicodedata.normalize("NFC", q or "")
+    q = re.sub(r"\s+", " ", q).strip()
+    return q
