@@ -1,5 +1,6 @@
 from typing import List, Dict, Any
 from utils import _norm, _meta_get, _post, normalize_question
+import requests, json
 from corpus import documents_list
 
 def _validate_question(q: str, min_len: int, max_len: int) -> str | None:
