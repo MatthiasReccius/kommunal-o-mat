@@ -1,4 +1,5 @@
-from utils import normalize_question
+from typing import List, Dict, Any
+from utils import _norm, _meta_get, _post, normalize_question
 from corpus import documents_list
 
 def _validate_question(q: str, min_len: int, max_len: int) -> str | None:
@@ -91,7 +92,7 @@ def answer_per_party_strict(
 ) -> List[Dict[str, Any]]:
 
     results: List[Dict[str, Any]] = []
-    q_norm = _normalize_question(question)
+    q_norm = normalize_question(question)
     err = _validate_question(q_norm, min_question_len, max_question_len)
 
     if err and not truncate_long:
