@@ -82,12 +82,36 @@ def answer_per_party_strict(
     question: str, 
     parties: List[str],
     k_retrieve: int = 3, 
-    max_quotes: int = 3
-    ):
-    results = []
+    max_quotes: int = 3,
+    *,
+    max_question_len: int = 800,     # <- neues weiches Limit
+    min_question_len: int = 5,       # <- optionales Unterlimit
+    truncate_long: bool = False      # <- alternativ: hart kürzen statt ablehnen
+) -> List[Dict[str, Any]]:
+
+    results: List[Dict[str, Any]] = []
+    q_norm = _normalize_question(question)
+    err = _validate_question(q_norm, min_question_len, max_question_len)
+
+    if err and not truncate_long:
+        # Für jede Partei ein konsistentes Ergebnisobjekt zurückgeben
+        for p in parties:
+            results.append({
+                "party": p,
+                "status": "invalid_input",
+                "message": err,
+                "quotes": [],
+                "summary": None,
+            })
+        return results
+
+    if err and truncate_long:
+        # Hartes Kürzen, wenn gewünscht
+        q_norm = q_norm[:max_question_len].rstrip()
+
     for p in parties:
-        hits, party_map = retrieve_party_hits(corpus_name, p, question, k=k_retrieve)
+        hits, party_map = retrieve_party_hits(corpus_name, p, q_norm, k=k_retrieve)
         results.append(
-            build_party_answer_from_hits(hits, question, party_map, max_quotes=max_quotes)
+            build_party_answer_from_hits(hits, q_norm, party_map, max_quotes=max_quotes)
         )
     return results
