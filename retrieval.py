@@ -1,4 +1,5 @@
 from utils import normalize_question
+from corpus import documents_list
 
 def _validate_question(q: str, min_len: int, max_len: int) -> str | None:
     if len(q) < min_len:
