@@ -1,3 +1,12 @@
+from utils import normalize_question
+
+def _validate_question(q: str, min_len: int, max_len: int) -> str | None:
+    if len(q) < min_len:
+        return f"Die Frage ist zu kurz (min. {min_len} Zeichen)."
+    if len(q) > max_len:
+        return f"Die Frage ist zu lang (max. {max_len} Zeichen)."
+    return None
+    
 def corpora_query(corpus_name, query, results_count=10, metadata_filters=None):
     body = {"query": query, "resultsCount": results_count}
     if metadata_filters:
