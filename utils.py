@@ -1,3 +1,5 @@
+import requests, json, unicodedata, re
+
 def _check_key():
     if not GEMINI_API_KEY:
         raise RuntimeError("Set GOOGLE_API_KEY in your environment")
