@@ -23,8 +23,12 @@ def corpora_create(display_name, corpus_id=None):
         raise RuntimeError("Corpus exists but not found via list()")
     return r.json()["name"]
 
-def documents_list(corpus_name, page_size=20):
-    url = f"{BASE}/{corpus_name}/documents"
+def documents_list(
+        corpus_name, 
+        BASE_API = "https://generativelanguage.googleapis.com/v1beta", 
+        page_size=20
+        ):
+    url = f"{BASE_API}/{corpus_name}/documents"
     out, token = [], None
     while True:
         params = {"pageSize": page_size}
