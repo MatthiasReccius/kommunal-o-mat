@@ -2,13 +2,13 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from typing import List
+from retrieval import answer_per_party_strict
+from rag import summarize_from_quotes
 import os, sys
 
 # Damit der Import der Funktionen aus dem Hauptverzeichnis klappt:
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
-from retrieval import answer_per_party_strict
-from rag import summarize_from_quotes
 
 app = FastAPI()
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
