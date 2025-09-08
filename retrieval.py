@@ -3,7 +3,7 @@ from utils import _norm, _meta_get, _post, normalize_question
 import requests, json
 from corpus import documents_list
 
-def _validate_question(q: str, min_len: int, max_len: int) -> str | None:
+def _validate_question(q: str, min_len: int = None, max_len: int) -> str | None:
     if len(q) < min_len:
         return f"Die Frage ist zu kurz (min. {min_len} Zeichen)."
     if len(q) > max_len:
