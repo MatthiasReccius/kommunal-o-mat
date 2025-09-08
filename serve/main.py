@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -17,7 +19,7 @@ templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "t
 ALL_PARTIES = ["SPD", "CDU", "Grüne", "Linke", "AfD", "FDP", "Die PARTEI"]
 
 # Konfiguration des Corpus-Pfads/Names (ggf. anpassen oder über Umgebungsvariable setzen)
-CORPUS_NAME = os.environ.get("CORPUS_NAME", "corpora/123456789")
+CORPUS_NAME = os.environ["CORPUS_NAME"]
 
 @app.get("/", response_class=HTMLResponse)
 def form_page(request: Request):
@@ -39,7 +41,7 @@ def submit_question(request: Request,
     # Für jede Partei ggf. eine Zusammenfassung der Zitate erzeugen:contentReference[oaicite:1]{index=1}
     for ans in answers:
         if ans.get("status") == "ok":
-            summary_text = summarize_from_quotes(ans["party"], question, ans["quotes"])
+            summary_text = summarize_from_quotes(question, ans["quotes"], ans["section"])
             ans["summary"] = summary_text
         # Bei status "no_info": ans["message"] enthält bereits den Hinweistext:contentReference[oaicite:2]{index=2}
 

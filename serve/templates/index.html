@@ -47,7 +47,7 @@
         <p><em>{{ ans.message }}</em></p>
       {% else %}
         <!-- Kurzfazit/Zusammenfassung der gefundenen Passagen -->
-        <p><strong>Kurzfazit:</strong> {{ ans.summary }}</p>
+        <div>{{ ans.summary | safe }}</div>
         <!-- Ausklappbare Details mit den Original-Zitaten aus dem Programm -->
         <details>
           <summary>Details aus dem Programmtext</summary>

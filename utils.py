@@ -1,4 +1,4 @@
-import requests, json, unicodedata, re
+import requests, json, unicodedata, re, os
 
 def _check_key():
     if not GEMINI_API_KEY:
@@ -10,6 +10,31 @@ def _post(url, body):
         return r  # caller may handle conflicts
     r.raise_for_status()
     return r
+
+def require_env(name: str) -> str:
+    v = os.environ.get(name)
+    if not v:
+        raise RuntimeError(f"Missing required env var: {name}")
+    return v
+
+def get_api_key() -> str:
+    return require_env("GOOGLE_API_KEY")
+
+def get_gen_model() -> str:
+    return require_env("GEN_MODEL")
+
+def get_headers() -> dict:
+    return {
+        "Content-Type": "application/json",
+        "x-goog-api-key": get_api_key(),
+    }
+
+GEN_API_KEY = get_api_key()
+
+HEADERS = {
+    "Content-Type": "application/json",
+    "x-goog-api-key": GEN_API_KEY,
+}
 
 def _get(url, params=None):
     r = requests.get(url, headers=HEADERS, params=params or {})

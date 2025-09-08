@@ -13,7 +13,7 @@ def corpora_query(corpus_name, query, results_count=10, metadata_filters=None):
     body = {"query": query, "resultsCount": results_count}
     if metadata_filters:
         body["metadataFilters"] = metadata_filters
-    return _post(f"{BASE}/{corpus_name}:query", body).json()["relevantChunks"]
+    return _post(f"https://generativelanguage.googleapis.com/v1beta/{corpus_name}:query", body).json()["relevantChunks"]
 
 def map_party_to_doc(corpus_name: str):
     docs = documents_list(corpus_name)
@@ -21,7 +21,7 @@ def map_party_to_doc(corpus_name: str):
     party_map = { _norm(d["displayName"]): d["displayName"] for d in docs }
     return by_norm, party_map
 
-def retrieve_party_hits(corpus_name: str, party_name: str, question: str, k: int = 5):
+def retrieve_party_hits(corpus_name: str, party_name: str, question: str, k: int = 2):
     docs_map, party_map = map_party_to_doc(corpus_name)
     party_path = docs_map.get(_norm(party_name))
     if not party_path:
@@ -86,7 +86,7 @@ def answer_per_party_strict(
     k_retrieve: int = 3, 
     max_quotes: int = 3,
     *,
-    max_question_len: int = 800,     # <- neues weiches Limit
+    max_question_len: int = 200,     # <- neues weiches Limit
     min_question_len: int = 5,       # <- optionales Unterlimit
     truncate_long: bool = False      # <- alternativ: hart kürzen statt ablehnen
 ) -> List[Dict[str, Any]]:

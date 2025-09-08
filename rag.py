@@ -1,14 +1,27 @@
 import requests, json
 from typing import List
+from utils import get_api_key, get_headers, get_gen_model
 
-def summarize_from_quotes(party: str, question: str, quotes: List[dict], max_tokens=1040):
+GEN_API_KEY = get_api_key()
+
+GEN_MODEL = get_gen_model()
+
+GEN_URL   = f"https://generativelanguage.googleapis.com/v1beta/{GEN_MODEL}:generateContent"
+
+HEADERS = get_headers()
+
+def summarize_from_quotes(
+        question: str, 
+        quotes: List[dict],
+        sections: List[dict],
+        ):
     if not quotes:
         return None
     context = "\n\n".join(f"[{i}] {q['quote']}" for i, q in enumerate(quotes, 1))
     prompt = (
-        "Fasse die Passagen im 'context' zusammen."
+        "Deine Aufgabe ist es, die Position der Partei zur gestellten Frage anhand der Passagen im 'context' zusammenzufassen."
         "Gib im ersten Satz zunächst ein Kurzfazit: Beantworte dabei, wie das Parteiprogramm die gestellte Frage beantwortet."
-        "Fasse die Passagen knapp zusammen, sofern sie in einem klarem inhaltlichen Zusammenhang zur Frage stehen."
+        "Fasse die Passagen darin sehr knapp im Sinne der Frage zusammen."
         "Nehme dabei schon Bezug auf die Inhalte der Passagen. Beschränke dich auf die Punkte, die der Partei am wichtigsten zu sein scheinen."
         "Wenn nach bestimmten Orten oder Stadtteilen gefragt wird, schränke ein, wenn diese Orte nicht explizit erwähnt werden"
         "Das Kurzfazit sollte einem der folgenden 4 Muster folgen: Die Partei fordert [...], Die Partei gibt an [...], Die Partei möchte [...] oder Die Partei hat in ihrem Programm keine explizite Position zu [...]."
@@ -17,11 +30,13 @@ def summarize_from_quotes(party: str, question: str, quotes: List[dict], max_tok
         "Fasse dann die konkreten, zur Frage passenden politischen Positionen und Forderungen innerhalb der jeweiligen Passagen zusammen."
         "Die Zusammenfassungen sollen aus bis zu 3-4 ganzen Sätzen bestehen und keine Bullet Points oder ähnliches enthalten."
         "Ordne die Passagen dabei nach Relevanz, sodass relevantere Passagen zuerst behandelt werden."
-        "Wenn du eine Passage zusammenfasst, ordne sie explizit der jeweiligen Passagen zu. Folge dabei immer dem Muster Passage [#]:"
+        "Wenn du eine Passage zusammenfasst, ordne sie explizit der jeweiligen Passagen zu. Folge dabei immer dem Muster Passage [#]: "
+        "Verwende Formulierungen wie 'In diesem Abschnitt des Parteiprogramms wird gesagt, dass ...' oder 'Diese Passage erwähnt erwähnt ...'."
         "Falls die Inhalte einer Passage keine direkte Relevanz zur gestellten Frage haben, ignoriere sie und fasse sie nicht zusammen."
-        "Schreibe dann lediglich: Passage [#] befasst sich nicht mit der Thematik. Füge in diesem Fall keinesfalls hinzu, womit sich diese irrelevante Passage befasst!"
+        "Schreibe dann lediglich: Die anderen Passagen befassen sich nicht mit der Thematik. Füge in diesem Fall keinesfalls hinzu, womit sich diese irrelevante Passage befasst!"
         "Wenn die Relevanz unklar ist, fasse die Passage zusammen um keine wichtigen Positionen auszulassen, aber betone zunächst, dass die Relevanz nicht eindeutig ist."
         "Nenne niemals Inhalte, die nicht in den Passagen stehen!"
+        "Formatiere die Antwort in HTML: <p><strong>Kurzfazit:</strong></p> <p>…dein Text…</p> <p><strong>Passage [1]:</strong></p> <p>…Text…</p> <p><strong>Passage [2]:</strong></p> <p>…Text…</p>"
         f"\n\nFrage: {question}\n\nZitate:\n{context}\n\nAntwort:"
     )
     r = requests.post(
