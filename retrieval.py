@@ -88,13 +88,12 @@ def answer_per_party_strict(
     max_quotes: int = 3,
     *,
     max_question_len: int = 800,     # <- neues weiches Limit
-    min_question_len: int = 5,       # <- optionales Unterlimit
     truncate_long: bool = False      # <- alternativ: hart kürzen statt ablehnen
 ) -> List[Dict[str, Any]]:
 
     results: List[Dict[str, Any]] = []
     q_norm = normalize_question(question)
-    err = _validate_question(q_norm, min_question_len, max_question_len)
+    err = _validate_question(q_norm, max_question_len)
 
     if err and not truncate_long:
         # Für jede Partei ein konsistentes Ergebnisobjekt zurückgeben
