@@ -1,6 +1,6 @@
 import requests, json
 
-def summarize_from_quotes(party: str, question: str, quotes: List[dict], max_tokens=1040):
+def summarize_from_quotes(party: str, question: str, quotes: list[dict], max_tokens=1040):
     if not quotes:
         return None
     context = "\n\n".join(f"[{i}] {q['quote']}" for i, q in enumerate(quotes, 1))
