@@ -87,7 +87,7 @@ def answer_per_party_strict(
     k_retrieve: int = 3, 
     max_quotes: int = 3,
     *,
-    max_question_len: int = 800,     # <- neues weiches Limit
+    max_question_len: int = 200,     # <- neues weiches Limit
     truncate_long: bool = False      # <- alternativ: hart kürzen statt ablehnen
 ) -> List[Dict[str, Any]]:
 
