@@ -3,61 +3,210 @@
 <head>
   <meta charset="UTF-8" />
   <title>Kommunal-O-Mat</title>
-  <!-- Einfaches Inline-CSS für eine bessere Lesbarkeit -->
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: sans-serif; margin: 2rem; }
-    form { margin-bottom: 2rem; }
-    label { margin-right: 1em; }
-    textarea { width: 100%; max-width: 600px; height: 4em; }
-    button { margin-top: 1em; padding: 0.5em 1em; }
-    h2 { margin-top: 1.5em; }
-    details { margin: 0.5em 0 1.5em 0; }
-    summary { cursor: pointer; font-weight: bold; }
-    blockquote { margin: 0.5em 0 0.5em 1em; padding-left: 0.8em; border-left: 4px solid #ccc; }
+    /* ===== Palette ===== */
+    :root {
+      --bg: #ffffff;
+      --card: #ffffff;
+      --text: #2e2e2e;
+      --muted: #555555;
+      --primary: #fde100;
+      --primary-text: #111111;
+      --border: #e0e0e0;
+      --quote-bar: #242424;
+      --chip-bg: #f9f9f9;
+      --chip-border: #d4d4d4;
+      --chip-checked-bg: #fff7c2;
+      --chip-checked-border: #fde100;
+      --shadow: 0 6px 16px rgba(17, 17, 17, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 2.5rem auto;
+      padding: 0 1rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 1.6rem;
+    }
+
+    h1 {
+      font-weight: 700;
+      margin: 0 0 0.75rem 0;
+      color: #111111;
+    }
+    .lead { margin: 0 0 1.25rem 0; color: var(--muted); }
+
+    /* Form */
+    form { margin: 0 0 1.25rem 0; }
+    .field { margin-bottom: 1rem; }
+    label.inline { display: inline-block; margin-bottom: .5rem; font-weight: 600; }
+
+    textarea {
+      width: 100%;
+      min-height: 6.5em;
+      resize: vertical;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: .9rem 1rem;
+      font-family: inherit;
+      font-size: 1rem;
+      color: inherit;
+      background: #fff;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(253, 225, 0, 0.4);
+    }
+
+    /* Remove UA invalid underline */
+    textarea:invalid, input:invalid { box-shadow: none !important; outline: none !important; }
+
+    /* Chips */
+    .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .45rem .8rem;
+      border-radius: 999px;
+      border: 1px solid var(--chip-border);
+      background: var(--chip-bg);
+      cursor: pointer;
+      font-size: .95rem;
+      transition: border-color .15s ease, background .15s ease;
+    }
+    .chip input[type="checkbox"] { display: none; }
+    .chip:has(input[type="checkbox"]:checked) {
+      background: var(--chip-checked-bg);
+      border-color: var(--chip-checked-border);
+    }
+
+    /* Button */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      padding: .7rem 1.05rem;
+      border-radius: 10px;
+      border: none;
+      background: var(--primary);
+      color: var(--primary-text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .06s ease, filter .15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .btn:active { transform: translateY(0); }
+
+    /* Results */
+    .party-block { margin-top: 1.25rem; }
+    .party-title {
+      margin: .25rem 0 .75rem 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #111111;
+    }
+    .summary-html { margin-bottom: .4rem; }
+
+    details {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .5rem .9rem;
+      background: #fafafa;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after {
+      content: "▾";
+      float: right;
+      transition: transform .2s ease;
+    }
+    details[open] summary::after { transform: rotate(180deg); }
+
+    blockquote {
+      margin: .65rem 0 .9rem 0;
+      padding: .2rem 0 .2rem 1rem;
+      border-left: 4px solid var(--quote-bar);
+      font-family: "Source Serif 4", serif;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #242424;
+    }
+    .muted { color: var(--muted); }
   </style>
 </head>
 <body>
-  <h1>Kommunal-O-Mat</h1>
-  <p>Geben Sie eine Frage ein und wählen Sie Parteien aus, um relevante Programm-Aussagen zu erhalten.</p>
-  <!-- Formular für Frageingabe und Parteienauswahl -->
-  <form method="post" action="/">
-    <p>
-      <label for="question"><strong>Frage stellen:</strong></label><br />
-      <textarea id="question" name="question" required>{{ question }}</textarea>
-    </p>
-    <p><strong>Parteien auswählen:</strong></p>
-    <p>
-      {% for party in parties %}
-        <label>
-          <input type="checkbox" name="parties" value="{{ party }}" 
-                 {% if party in selected_parties %}checked{% endif %}>
-          {{ party }}
-        </label>
-      {% endfor %}
-    </p>
-    <button type="submit">Absenden</button>
-  </form>
+  <div class="container">
+    <div class="card">
+      <h1>Kommunal-O-Mat</h1>
+      <p class="lead">Gib eine Frage ein und wähle Parteien aus, um passende Programm-Aussagen zu erhalten.</p>
 
-  {% if answers %}
-    <!-- Ergebnisse pro Partei ausgeben -->
-    {% for ans in answers %}
-      <h2>{{ ans.party }}</h2>
-      {% if ans.status != "ok" %}
-        <!-- Hinweis, falls keine relevanten Passagen gefunden wurden -->
-        <p><em>{{ ans.message }}</em></p>
-      {% else %}
-        <!-- Kurzfazit/Zusammenfassung der gefundenen Passagen -->
-        <div>{{ ans.summary | safe }}</div>
-        <!-- Ausklappbare Details mit den Original-Zitaten aus dem Programm -->
-        <details>
-          <summary>'Der Kontext': Wörtliche Auszüge aus dem Parteiprogramm</summary>
-          {% for q in ans.quotes %}
-            <p><em>Aus dem Kapitel "{{ q.section }}"</em>:</p>
-            <blockquote>{{ q.quote }}</blockquote>
-          {% endfor %}
-        </details>
+      <form method="post" action="/" novalidate>
+        <div class="field">
+          <label class="inline" for="question">Frage stellen</label>
+          <textarea id="question" name="question" required spellcheck="false" autocomplete="off" autocapitalize="off">{{ question }}</textarea>
+        </div>
+
+        <div class="field">
+          <div class="inline" style="margin-bottom:.35rem;">Parteien auswählen</div>
+          <div class="chips">
+            {% for party in parties %}
+              <label class="chip">
+                <input type="checkbox" name="parties" value="{{ party }}" {% if party in selected_parties %}checked{% endif %}>
+                <span>{{ party }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button class="btn" type="submit">Absenden</button>
+      </form>
+
+      {% if answers %}
+        {% for ans in answers %}
+          <section class="party-block">
+            <div class="party-title">{{ ans.party }}</div>
+            {% if ans.status != "ok" %}
+              <p class="muted"><em>{{ ans.message }}</em></p>
+            {% else %}
+              <div class="summary-html">{{ ans.summary | safe }}</div>
+              <details>
+                <summary>„Der Kontext“: Wörtliche Auszüge aus dem Parteiprogramm</summary>
+                {% for q in ans.quotes %}
+                  <p class="muted"><em>Aus dem Kapitel „{{ q.section }}“</em>:</p>
+                  <blockquote>{{ q.quote }}</blockquote>
+                {% endfor %}
+              </details>
+            {% endif %}
+          </section>
+        {% endfor %}
       {% endif %}
-    {% endfor %}
-  {% endif %}
+    </div>
+  </div>
 </body>
 </html>
