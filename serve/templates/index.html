@@ -18,11 +18,11 @@
 </head>
 <body>
   <h1>Kommunal-O-Mat</h1>
-  <p>Geben Sie eine Frage ein und wählen Sie die Parteien aus, um relevante Programm-Aussagen zu erhalten.</p>
+  <p>Geben Sie eine Frage ein und wählen Sie Parteien aus, um relevante Programm-Aussagen zu erhalten.</p>
   <!-- Formular für Frageingabe und Parteienauswahl -->
   <form method="post" action="/">
     <p>
-      <label for="question"><strong>Ihre Frage:</strong></label><br />
+      <label for="question"><strong>Frage stellen:</strong></label><br />
       <textarea id="question" name="question" required>{{ question }}</textarea>
     </p>
     <p><strong>Parteien auswählen:</strong></p>
@@ -50,7 +50,7 @@
         <div>{{ ans.summary | safe }}</div>
         <!-- Ausklappbare Details mit den Original-Zitaten aus dem Programm -->
         <details>
-          <summary>Details aus dem Programmtext</summary>
+          <summary>'Der Kontext': Wörtliche Auszüge aus dem Parteiprogramm</summary>
           {% for q in ans.quotes %}
             <p><em>Aus dem Kapitel "{{ q.section }}"</em>:</p>
             <blockquote>{{ q.quote }}</blockquote>

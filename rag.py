@@ -1,5 +1,5 @@
 import requests, json
-from typing import List
+from typing import List, Dict, Any
 from utils import get_api_key, get_headers, get_gen_model
 
 GEN_API_KEY = get_api_key()
@@ -12,12 +12,20 @@ HEADERS = get_headers()
 
 def summarize_from_quotes(
         question: str, 
-        quotes: List[dict],
-        sections: List[dict],
-        ):
+        quotes: List[Dict[str, Any]]
+        ) -> str | None:
     if not quotes:
         return None
-    context = "\n\n".join(f"[{i}] {q['quote']}" for i, q in enumerate(quotes, 1))
+
+    # Build LLM context: include section next to each passage
+    ctx_lines = []
+    for i, q in enumerate(quotes, 1):
+        sec = (q.get("section") or "").strip()
+        if sec:
+            ctx_lines.append(f"[{i}] (Section: {sec})\n{q['quote']}")
+        else:
+            ctx_lines.append(f"[{i}]\n{q['quote']}")
+    context = "\n\n".join(ctx_lines)
     prompt = (
         "Deine Aufgabe ist es, die Position der Partei zur gestellten Frage anhand der Passagen im 'context' zusammenzufassen."
         "Gib im ersten Satz zunächst ein Kurzfazit: Beantworte dabei, wie das Parteiprogramm die gestellte Frage beantwortet."
@@ -28,15 +36,18 @@ def summarize_from_quotes(
         "Falls die Passagen alle nicht zur Frage passen, erwähne im Kurzfazit nur, dass die Partei zur Frage keine explizite Position bezieht."
         "Ziehe niemals Schlussfolgerungen zu Parteipositionen aus dem Fehlen thematisch relevanter Passagen."
         "Fasse dann die konkreten, zur Frage passenden politischen Positionen und Forderungen innerhalb der jeweiligen Passagen zusammen."
-        "Die Zusammenfassungen sollen aus bis zu 3-4 ganzen Sätzen bestehen und keine Bullet Points oder ähnliches enthalten."
-        "Ordne die Passagen dabei nach Relevanz, sodass relevantere Passagen zuerst behandelt werden."
-        "Wenn du eine Passage zusammenfasst, ordne sie explizit der jeweiligen Passagen zu. Folge dabei immer dem Muster Passage [#]: "
-        "Verwende Formulierungen wie 'In diesem Abschnitt des Parteiprogramms wird gesagt, dass ...' oder 'Diese Passage erwähnt erwähnt ...'."
         "Falls die Inhalte einer Passage keine direkte Relevanz zur gestellten Frage haben, ignoriere sie und fasse sie nicht zusammen."
         "Schreibe dann lediglich: Die anderen Passagen befassen sich nicht mit der Thematik. Füge in diesem Fall keinesfalls hinzu, womit sich diese irrelevante Passage befasst!"
+        "Ordne die Passagen dabei nach Relevanz, sodass relevantere Passagen zuerst behandelt werden."
         "Wenn die Relevanz unklar ist, fasse die Passage zusammen um keine wichtigen Positionen auszulassen, aber betone zunächst, dass die Relevanz nicht eindeutig ist."
+        "Die Zusammenfassungen sollen aus maximal 3 kurzen Sätzen bestehen. Sie dürfen keine Bullet Points oder ähnliches enthalten."
+        "Vermeide aufzählende Sprachmuster. Verlagere lange Nebensätze lieber in einen eigenen Satz."
+        "Wenn du eine Passage zusammenfasst, ordne sie explizit der jeweiligen Passagen zu. Folge dabei immer dem Muster 'Passage #:'. Verwende nie Klammern um die Passagen-Nummer."
+        "Verwende in der Zusammenfassung immer den Titel der Section. Nutze Formulierungen wie 'Im Abschnitt <i>'Section'</i> des Parteiprogramms steht, dass ...' oder 'Die Passage <i>'Section'</i> erwähnt ...'."
+        "Nutze immer Anführungszeichen und die Kursiv-Tags um die Titel der Sections."
+        "Vermeide insbesondere im Kurzfazit verschachtelte Sätze. Halte die Sätze kurz und prägnant."
         "Nenne niemals Inhalte, die nicht in den Passagen stehen!"
-        "Formatiere die Antwort in HTML: <p><strong>Kurzfazit:</strong></p> <p>…dein Text…</p> <p><strong>Passage [1]:</strong></p> <p>…Text…</p> <p><strong>Passage [2]:</strong></p> <p>…Text…</p>"
+        "Formatiere die Antwort in HTML: <p><strong>Kurzfazit:</strong></p> <p>…dein Text…</p> <p><strong>Passage 1:</strong></p> <p>…Text…</p> <p><strong>Passage 2:</strong></p> <p>…Text…</p>"
         f"\n\nFrage: {question}\n\nZitate:\n{context}\n\nAntwort:"
     )
     r = requests.post(

@@ -1,1 +1,3 @@
 data
+clean_key.txt
+*.pyc

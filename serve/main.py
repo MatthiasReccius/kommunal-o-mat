@@ -41,7 +41,7 @@ def submit_question(request: Request,
     # Für jede Partei ggf. eine Zusammenfassung der Zitate erzeugen:contentReference[oaicite:1]{index=1}
     for ans in answers:
         if ans.get("status") == "ok":
-            summary_text = summarize_from_quotes(question, ans["quotes"], ans["section"])
+            summary_text = summarize_from_quotes(question, ans["quotes"])
             ans["summary"] = summary_text
         # Bei status "no_info": ans["message"] enthält bereits den Hinweistext:contentReference[oaicite:2]{index=2}
 
