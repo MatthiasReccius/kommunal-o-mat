@@ -2,7 +2,7 @@ from typing import List, Dict, Any
 from utils import _norm, _meta_get, _post, normalize_question
 from corpus import documents_list
 
-def _validate_question(q: str, max_len: int, min_len: int = None) -> str | None:
+def _validate_question(q: str, min_len: int = 5, max_len: int = 200) -> str | None:
     if len(q) < min_len:
         return f"Die Frage ist zu kurz (min. {min_len} Zeichen)."
     if len(q) > max_len:
@@ -93,7 +93,7 @@ def answer_per_party_strict(
 
     results: List[Dict[str, Any]] = []
     q_norm = normalize_question(question)
-    err = _validate_question(q_norm, max_question_len)
+    err = _validate_question(q_norm, min_question_len, max_question_len)
 
     if err and not truncate_long:
         # Für jede Partei ein konsistentes Ergebnisobjekt zurückgeben
@@ -112,6 +112,8 @@ def answer_per_party_strict(
         q_norm = q_norm[:max_question_len].rstrip()
 
     for p in parties:
+        if p == "Die PARTEI":
+            p = "Die Partei"
         hits, party_map = retrieve_party_hits(corpus_name, p, q_norm, k=k_retrieve)
         results.append(
             build_party_answer_from_hits(hits, q_norm, party_map, max_quotes=max_quotes)

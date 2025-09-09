@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -32,20 +33,42 @@ def form_page(request: Request):
     })
 
 @app.post("/", response_class=HTMLResponse)
-def submit_question(request: Request, 
-                    question: str = Form(...), 
-                    parties: List[str] = Form(...)):
+def submit_question(
+    request: Request, 
+    question: str = Form(...), 
+    parties: List[str] = Form(...)
+):
     """Verarbeitet die Formular-Eingabe und zeigt die Ergebnisse an (POST /)."""
-    # Zitate pro Partei abrufen (für jede gewählte Partei relevante Textstellen finden)
+    # 1) Parallel retrieval (already inside answer_per_party_strict)
     answers = answer_per_party_strict(CORPUS_NAME, question, parties, k_retrieve=5, max_quotes=5)
-    # Für jede Partei ggf. eine Zusammenfassung der Zitate erzeugen:contentReference[oaicite:1]{index=1}
-    for ans in answers:
-        if ans.get("status") == "ok":
-            summary_text = summarize_from_quotes(question, ans["quotes"])
-            ans["summary"] = summary_text
-        # Bei status "no_info": ans["message"] enthält bereits den Hinweistext:contentReference[oaicite:2]{index=2}
 
-    # Template mit den Ergebnissen rendern
+    # 2) Parallel summarization per party (only for status == "ok" with quotes)
+    idxs_to_sum = [i for i,a in enumerate(answers) if a.get("status") == "ok" and a.get("quotes")]
+    if idxs_to_sum:
+        # Be kind to quotas/rate limits
+        max_workers = min(len(idxs_to_sum), 8)
+
+        def _summarize(i: int):
+            a = answers[i]
+            try:
+                # If your summarize_from_quotes supports a max_tokens param, add it here for speed:
+                # s = summarize_from_quotes(question, a["quotes"], max_tokens=240)
+                s = summarize_from_quotes(question, a["quotes"])
+                return (i, s, None)
+            except Exception as e:
+                return (i, None, str(e))
+
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futs = [pool.submit(_summarize, i) for i in idxs_to_sum]
+            for fut in as_completed(futs):
+                i, s, err = fut.result()
+                if err:
+                    answers[i]["summary_status"] = "error"
+                    answers[i]["summary_error"] = err
+                else:
+                    answers[i]["summary"] = s
+
+    # 3) Render
     return templates.TemplateResponse("index.html", {
         "request": request,
         "parties": ALL_PARTIES,
