@@ -28,7 +28,7 @@ def documents_list(
         BASE_API = "https://generativelanguage.googleapis.com/v1beta", 
         page_size=20
         ):
-    url = f"{BASE_API}/{corpus_name}/documents"
+    url = f"{BASE_API}/corpora/{corpus_name}/documents"
     out, token = [], None
     while True:
         params = {"pageSize": page_size}

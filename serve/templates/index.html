@@ -49,6 +49,14 @@
       padding: 1.6rem;
     }
 
+    .quote-item{margin:.75rem 0}
+    .quote-head{display:flex;align-items:center;gap:.5rem}
+    .badge{
+      display:inline-block; min-width:1.6rem; padding:.1rem .5rem;
+      border-radius:999px; background:var(--primary); color:var(--primary-text);
+      font-weight:700; text-align:center; line-height:1.2;
+    }
+
     h1 {
       font-weight: 700;
       margin: 0 0 0.75rem 0;
@@ -82,6 +90,21 @@
 
     /* Remove UA invalid underline */
     textarea:invalid, input:invalid { box-shadow: none !important; outline: none !important; }
+    
+    .party-header{ display:flex; align-items:center; gap:.75rem; } /* if not already */
+    .party-logo{ width:95px; height:95px; object-fit:contain; flex:0 0 auto; } /* for PNG/JPG/SVG */
+
+    .logo-pdf-wrap{
+      width:95px; height:95px;
+      overflow:hidden; border-radius:8px; flex:0 0 auto;
+    }
+    .logo-pdf{
+      width:75px; height:75px;
+      transform: scale(3);           /* zoom the PDF */
+      transform-origin: top left;
+      pointer-events:none;
+      border:0;
+    }
 
     /* Chips */
     .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
@@ -107,6 +130,7 @@
     .btn {
       display: inline-flex;
       align-items: center;
+      margin-top: 1rem;
       padding: .7rem 1.05rem;
       border-radius: 10px;
       border: none;
@@ -120,14 +144,14 @@
     .btn:active { transform: translateY(0); }
 
     /* Results */
-    .party-block { margin-top: 1.25rem; }
+    .party-block { margin-top: 2rem; }
     .party-title {
-      margin: .25rem 0 .75rem 0;
-      font-size: 1.2rem;
+      margin: .25rem 0.4rem 0;
+      font-size: 2rem;
       font-weight: 700;
       color: #111111;
     }
-    .summary-html { margin-bottom: .4rem; }
+    .summary-html { margin-bottom: .6rem; }
 
     details {
       border: 1px solid var(--border);
@@ -135,6 +159,18 @@
       padding: .5rem .9rem;
       background: #fafafa;
     }
+
+      /* Highlighted summary */
+    details.context { background: #fafafa; } /* Box bleibt dezent */
+    details.context summary {
+      background: var(--chip-checked-bg);       /* #fff7c2 */
+      border: 1px solid var(--chip-checked-border); /* #fde100 */
+      padding: .45rem .7rem;
+      border-radius: 8px;
+      margin: .25rem 0 .5rem 0;
+}
+    details.context[open] summary { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+
     summary {
       cursor: pointer;
       font-weight: 600;
@@ -158,6 +194,49 @@
       color: #242424;
     }
     .muted { color: var(--muted); }
+
+    .hidden{display:none}
+    .notice{border:1px solid var(--border); border-radius:10px; padding:.6rem .9rem; margin:1rem 0;}
+    .notice.notice-wait{
+      white-space: pre-wrap;
+      background: var(--card);            /* oder #fff */
+      border-color: var(--chip-checked-border); /* gelber Rand bleibt */
+    }
+
+    .notice-warn{
+      white-space: pre-wrap;
+      background:#fff; 
+      border:2px solid #d93025; 
+      color:#111;} /* rot gerahmt */
+
+    :root{
+      --text:#242424; --bg:#fff;
+      --chip-bg:#f7f7f7; --chip-border:#e5e5e5;
+      --chip-hover:#fde100; /* Marken-Gelb */
+      --chip-text:#111111;
+    }
+    .examples { margin-top: 1.25rem; margin-bottom: 1.25rem; --chip-border: #9e9e9e; border-color: #767676;}
+    .examples__title{
+      margin: 0 0 .6rem; font-size: 0.95rem; color: var(--text);
+      font-weight: 600; letter-spacing:.2px;
+    }
+    .examples__grid{
+      display: grid; gap: .6rem;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+    .chip{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:.65rem .9rem; border-radius:9999px;
+      background: var(--chip-bg); border:1px solid var(--chip-border); color:var(--chip-text);
+      font: 500 0.95rem/1.1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      cursor:pointer; transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
+      text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .chip:hover{ border-color: var(--chip-hover); box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.06); }
+    .chip:active{ transform: translateY(1px); }
+    .chip:focus-visible{ outline: 3px solid var(--chip-hover); outline-offset: 2px; }
+    @media (max-width:520px){ .examples__grid{ grid-template-columns: 1fr 1fr; } }
+
   </style>
 </head>
 <body>
@@ -172,8 +251,24 @@
           <textarea id="question" name="question" required spellcheck="false" autocomplete="off" autocapitalize="off">{{ question }}</textarea>
         </div>
 
+        <section class="examples" data-examples data-autosubmit="false" aria-label="Beispielfragen">
+          <h3 class="examples__title">oder stelle eine Beispielfrage zu...</h3>
+          <div class="examples__grid">
+            <button class="chip" type="button" data-q="Wie wollen die Parteien die Kinderbetreuung in Kitas zuverlässiger machen?">Kinderbetreuung</button>
+            <button class="chip" type="button" data-q="Was soll gegen steigende Mieten getan werden?">Steigende Mieten</button>
+            <button class="chip" type="button" data-q="Wie soll mehr Natur und Grün in die Stadt gebracht werden?">Natur in der Stadt</button>
+            <button class="chip" type="button" data-q="Wie soll die Stadt neue Unternehmen und Arbeitsplätze anziehen?">Jobs</button>
+            <button class="chip" type="button" data-q="Wie sollen Konflikte zwischen Autos und Fahrrädern in der Innenstadt gelöst werden?">Verkehr</button>
+            <button class="chip" type="button" data-q="Wie sollte die Nutzung von Parks für Veranstaltungen geregelt werden?">Parks & Veranstaltungen</button>
+            <button class="chip" type="button" data-q="Wie soll die Stadt klimaneutral werden?">Klimaneutralität</button>
+            <button class="chip" type="button" data-q="Wie möchten die Parteien Geflüchtete integrieren?">Integration</button>
+            <button class="chip" type="button" data-q="Wollen die Parteien die Verwaltung digitalisieren?">Digitale Verwaltung</button>
+          </div>
+        </section>
+
+
         <div class="field">
-          <div class="inline" style="margin-bottom:.35rem;">Parteien auswählen</div>
+          <div class="inline" style="margin-bottom:.35rem;margin-top:.35rem;">Parteien auswählen</div>
           <div class="chips">
             {% for party in parties %}
               <label class="chip">
@@ -184,29 +279,85 @@
           </div>
         </div>
 
-        <button class="btn" type="submit">Absenden</button>
+        <button class="btn" type="submit">Absenden</button><br>
+        <div id="loading-notice" class="notice notice-wait hidden">⌛ Bitte hab ein paar Momente Geduld...</div>
       </form>
 
       {% if answers %}
+        <div class="notice notice-warn">🧐❗ Hinweis: Die Antworten wurden von einem Sprachmodell erstellt und können Fehler enthalten. Es gelten nur die offiziellen Parteiprogramme. Die Reihenfolge der Parteien entspricht ihren Stimmenanteilen bei der Ratswahl 2020.</div>
         {% for ans in answers %}
           <section class="party-block">
-            <div class="party-title">{{ ans.party }}</div>
+            <div class="party-header">
+              {% if ans.logo_url %}
+                {% if ans.logo_is_pdf %}
+                  <div class="logo-pdf-wrap">
+                    <object class="logo-pdf" data="{{ ans.logo_url }}#zoom=300"
+                            type="application/pdf" aria-label="{{ ans.party }} Logo"></object>
+                  </div>
+                {% else %}
+                  <img class="party-logo" src="{{ ans.logo_url }}" alt="{{ ans.party }} Logo" loading="lazy" decoding="async">
+                {% endif %}
+              {% endif %}
+              <div class="party-title">{{ ans.party }}</div>
+            </div>
             {% if ans.status != "ok" %}
               <p class="muted"><em>{{ ans.message }}</em></p>
             {% else %}
               <div class="summary-html">{{ ans.summary | safe }}</div>
-              <details>
-                <summary>„Der Kontext“: Wörtliche Auszüge aus dem Parteiprogramm</summary>
+                <details class="context">
+                  <summary>„Der Kontext“ zum Nachlesen: Das Parteiprogramm im Wortlaut ({{ ans.quotes|length }} Passagen)</summary>
                 {% for q in ans.quotes %}
-                  <p class="muted"><em>Aus dem Kapitel „{{ q.section }}“</em>:</p>
+                  <p class="muted"><em>Passage {{ loop.index }} — Aus dem Kapitel „{{ q.section }}“</em>:</p>
                   <blockquote>{{ q.quote }}</blockquote>
                 {% endfor %}
-              </details>
+                </details>
             {% endif %}
           </section>
         {% endfor %}
       {% endif %}
     </div>
   </div>
+  <script>
+  document.addEventListener('DOMContentLoaded', function(){
+    const form = document.querySelector('form');
+    const waitBox = document.getElementById('loading-notice');
+    const submitBtn = form?.querySelector('button[type="submit"]');
+    if (!form) return;
+    form.addEventListener('submit', function(){
+      if (waitBox) waitBox.classList.remove('hidden');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Wird gesendet…'; }
+    });
+  });
+  </script>
+
+  <script>
+    (function () {
+      const container = document.querySelector('[data-examples]');
+      if (!container) return;
+
+      // <== Passe diese Selektoren an, falls deine IDs anders heißen
+      const input = document.querySelector('#frageInput')
+        || document.querySelector('textarea[name="question"], input[name="question"]')
+        || document.querySelector('textarea, input[type="text"]');
+
+      const form  = document.querySelector('#frageForm') || (input && input.form) || null;
+      const autoSubmit = (container.dataset.autosubmit || 'false') === 'true';
+
+      container.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-q]');
+        if (!btn || !input) return;
+        const q = btn.getAttribute('data-q') || btn.textContent.trim();
+        input.value = q;
+        // Für Frameworks, die auf 'input' lauschen (React/Vue/etc.)
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.focus();
+
+        if (autoSubmit && form && typeof form.requestSubmit === 'function') {
+          form.requestSubmit();
+        }
+      });
+    })();
+  </script>
+
 </body>
 </html>

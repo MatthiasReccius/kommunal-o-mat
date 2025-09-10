@@ -18,7 +18,7 @@ def require_env(name: str) -> str:
     return v
 
 def get_api_key() -> str:
-    return require_env("GOOGLE_API_KEY")
+    return require_env("GENAI_API_KEY")
 
 def get_gen_model() -> str:
     return require_env("GEN_MODEL")

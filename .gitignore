@@ -1,3 +1,6 @@
 data
 clean_key.txt
 *.pyc
+.env
+static/*.pdf
+static/*.webp
